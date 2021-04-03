@@ -1,0 +1,31 @@
+
+NEEDED INTERFACE
+MultiANN(dim, maxNeighbors, topology, scale)
+ - AddPoint(point's coordinates, pointer to the point - must not be deleted?)
+ - NearestNeighbor(query_pt, index(returned), best distance(returned)
+ - NearestNeighbor(query_pt, array of distances(returned), array of indices - int (returned), array of pointers to NNs(returned)
+
+need way to check neighbors within certain distance (shouldn't be too hard to add to c++ code??)
+
+(single NearestNeighbor)
+ - const double* &  :  reference to pointer to constant double (ANNpoint)
+ - int &            :  reference to int
+ - double &         :  reference to double
+
+(k NN)
+ - const double* &  :  reference to pointer to constant double (ANNpoint)
+ - double* &        :  reference to pointer to double (array of ANNpoint)
+ - int *&           :  reference to pointer to int (array of int)
+ - void **&         :  reference to pointer to pointer to void (array of pointers)
+
+
+(AddPoint)
+ - double*          :  pointer to double (ANNpoint)
+ - void *           :  pointer to void
+
+
+INITIALIZATION
+ - int              :  int (dimension of space)
+ - int              :  int (k - num of NN to be returned)
+ - int*             :  pointer to int (array of int - topologies)
+ - double*          :  pointer to double (ANNpoint)
