@@ -41,6 +41,7 @@
 
 #include "ANN.h"  // ANN declarations
 #include "multiann.h"
+#include <tuple>
 
 #ifndef INFINITY
 #define INFINITY 1.0e40
@@ -111,6 +112,35 @@ MultiANN::MultiANN(  // constructor
     }
 }
 
+// ------------------
+MultiANN::MultiANN(  // constructor
+    int dim,         // dimension of the space
+    int k,           // max num-neighbors to query for
+    std::vector<int> tt,         // topology of the space
+    std::vector<double> ss,     // scaling of the coordinates
+    int tree_size)
+{
+    NumNeighbors = k;         // greatest nearest neighbor call will be 16
+    dimension = dim;
+    LastNodeCount = 0;
+    size = 0;
+
+    topology = new int[dimension];                    // allocate topology array
+    scaling = annAllocPt(dimension);                  // allocate scaling array
+    points_coor = annAllocPts(tree_size, dimension);  // allocate data points
+    points_ptr = new void *[tree_size];  // allocate pointers to the data points
+
+    for (int i = 0; i < dimension; i++) {
+        topology[i] = tt[i];
+        scaling[i] = ss[i];
+    }
+
+    for (int k = 0; k < ANN_MAXIMUM_INDEX + 1; k++) {
+        AnnArray[k] = NULL;
+    }
+}
+// ------------------
+
 MultiANN::~MultiANN()  // destructor
 {
     annDeallocPts(points_coor);  // deallocate coordinates of data points
@@ -123,6 +153,28 @@ void MultiANN::AddPoint(  // dynamic update of the data points
     ANNpoint x_coor,      // coordinates of the point
     void *x_ptr)          // pointer to the point
 {
+    for (int i = 0; i < dimension; i++) {
+        points_coor[size][i] = x_coor[i];
+    }
+    points_ptr[size] = (void *)x_ptr;
+    size++;
+
+    if ((size != LastNodeCount) &&
+        (size % ((int)pow((double)2, ANN_STARTING_INDEX)) ==
+         0)) {  // Check if it is time to update the ANNs
+        LastNodeCount = size;
+        UpdateAnnArray();
+    }
+}
+
+void MultiANN::AddPoint(  // dynamic update of the data points
+    std::vector<double> x_coor)      // coordinates of the point
+    {
+//    ANNcoord this_coor [x_coor.size()];
+//    std::copy(x_coor.begin(), x_coor.end(), this_coor);
+//    ANNpoint this_point = &this_coor[0];
+
+    void *x_ptr = &x_coor;  // must ensure lifetime of x_coor!!!
     for (int i = 0; i < dimension; i++) {
         points_coor[size][i] = x_coor[i];
     }
@@ -401,3 +453,126 @@ void MultiANN::NearestNeighbor(
     delete[] d1;
 }
 
+// -------------------------------
+std::tuple< std::vector<double>, std::vector<int> > MultiANN::NearestNeighbor(
+    std::vector<double> x,  // query point
+    int nn_num)                  // number of nearest neighbors to return
+{
+    int n, n_last, j, k, l, m;
+    double d;
+
+    // copy double into array, give pointer to first element
+    // array of double* const&
+    double *new_x = new double[x.size()];
+    for (int i = 0; i < x.size(); i++) {
+        new_x[i] = x[i];
+    }
+
+    std::vector<double> best_dist(nn_num);
+    std::vector<int> best_idx(nn_num);
+
+    int *node_list = new int[nn_num];
+    int *help_list = new int[nn_num];
+    double *d1 = new double[nn_num];
+    double *d_help = new double[nn_num];
+
+    for (int i = 0; i < nn_num; i++) {
+        best_dist[i] = INFINITY;
+        d1[i] = 0.0;
+        d_help[i] = 0.0;
+        best_idx[i] = 0;
+        node_list[i] = 0;
+        help_list[i] = 0;
+    }
+
+    n_last = n = 0;  // Keeps the warnings away
+
+    // Find the nearest neighbor
+    // First check the ANN trees
+    for (k = ANN_MAXIMUM_INDEX; k >= ANN_STARTING_INDEX; k--) {
+        if (AnnArray[k]) {
+            AnnArray[k]->NearestNeighbor(topology, scaling, new_x, nn_num, d1,
+                                         node_list);
+            m = 0;
+            j = 0;
+            l = 0;
+            while (m < nn_num && j < nn_num && l < nn_num) {
+                if (best_dist[m] > d1[j]) {
+                    d_help[l] = d1[j];
+                    help_list[l] = node_list[j];
+                    j++;
+                    l++;
+                } else {
+                    d_help[l] = best_dist[m];
+                    help_list[l] = best_idx[m];
+                    m++;
+                    l++;
+                }
+            }
+            for (int i = 0; i < nn_num; i++) {
+                best_dist[i] = d_help[i];
+                best_idx[i] = help_list[i];
+            }
+            n_last = AnnArray[k]->LastNode();
+            if (n_last != size) n_last++;
+        }
+    }
+
+    // Check the new nodes, which are not yet in the ANN tree
+    for (n = n_last; n != size; n++) {
+        ANNpoint x1 = points_coor[n];
+        d = 0.0;
+        for (int i = 0; i < dimension; i++) {
+            if (topology[i] == 1) {
+                d += ANN_POW(scaling[i] * (x1[i] - x[i]));
+            } else if (topology[i] == 2) {
+                double t = fabs(x1[i] - x[i]);
+                double t1 = ANN_MIN(t, 2.0 * PI - t);
+                d += ANN_POW(scaling[i] * t1);
+            } else if (topology[i] == 3) {
+                double fd = x1[i] * x[i] + x1[i + 1] * x[i + 1] +
+                            x1[i + 2] * x[i + 2] + x1[i + 3] * x[i + 3];
+                if (fd > 1) {
+                    double norm1 = x1[i] * x1[i] + x1[i + 1] * x1[i + 1] +
+                                   x1[i + 2] * x1[i + 2] +
+                                   x1[i + 3] * x1[i + 3];
+                    double norm2 = x[i] * x[i] + x[i + 1] * x[i + 1] +
+                                   x[i + 2] * x[i + 2] + x[i + 3] * x[i + 3];
+                    fd = fd / (norm1 * norm2);
+                }
+                double dtheta = ANN_MIN(acos(fd), acos(-fd));
+                d += ANN_POW(scaling[i] * dtheta);
+                i = i + 3;
+            }
+        }
+        d = sqrt(d);
+        bool flag = true;
+        int ind = nn_num + 2;
+        j = 0;
+        while (flag && j < nn_num) {
+            if (d < best_dist[j]) {
+                flag = false;
+                ind = j;
+            }
+            j++;
+        }
+        if (ind < nn_num) {
+            for (int m = (nn_num - 1); m > ind; m--) {
+                best_dist[m] = best_dist[m - 1];
+                best_idx[m] = best_idx[m - 1];
+            }
+            best_idx[ind] = n;
+            best_dist[ind] = d;
+        }
+    }
+
+    delete[] node_list;
+    delete[] help_list;
+    delete[] d_help;
+    delete[] d1;
+
+    std::tuple< std::vector<double>, std::vector<int> > return_tup = std::make_tuple(best_dist, best_idx);
+    return  return_tup;
+}
+
+// -------------------------------

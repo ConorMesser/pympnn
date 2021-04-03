@@ -44,6 +44,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <vector>
 
 #include "nn.h"
 
@@ -79,11 +80,21 @@ class MultiANN{
 	   int *topology, 			// topology of the space 
 	   ANNpoint scaling);			// scaling of the coordinates
 
+  MultiANN(					// constructor
+       int dim,  				// dimension of the space
+       int k,                   // max num-neighbors to query for
+       std::vector<int> topology, 			// topology of the space
+       std::vector<double> scaling,			// scaling of the coordinates
+       int tree_size);          // max size of the kd-tree
+
   ~MultiANN();					// destructor
-  void ResetMultiANN();				// destroys all the arrays of data points
+  void ResetMultiANN();			// destroys all the arrays of data points
   void AddPoint(				// dynamic update of the data points
-		ANNpoint x_coor,		// the point's coordinates 
-		void *x_ptr);			// the pointer to the point 
+		ANNpoint x_coor,		// the point's coordinates
+		void *x_ptr);			// the pointer to the point
+
+  void AddPoint(                      // dynamic update of the data points
+        std::vector<double> x_coor);  // the point's coordinates
 
   void UpdateAnnArray();			// updates the arrays of data points
 
@@ -96,6 +107,10 @@ class MultiANN{
 		       const ANNpoint &x, 	// query point 
 		       ANNpoint &best_dist,  	// array of distances from the k nearest neighbors to x (returned) 
 		       int *&best_idx, 		// array of indices of k nearest neighbors to x (returned) 
-		       void **&best_ptr);      	// array of pointers to k nearest neighbors to x (returned) 
+		       void **&best_ptr);      	// array of pointers to k nearest neighbors to x (returned)
+
+  std::tuple< std::vector<double>, std::vector<int> > NearestNeighbor(  	  // k-nearest neighbor query
+		       std::vector<double> x, // query point
+		       int k); 	              // number of nearest neighbors to return
 };
 #endif
