@@ -20,6 +20,8 @@ test:      Sample code that uses the library
 
 ## Build Instructions
 
+### Linux
+
 1. Build the mpnn library  
    a. Create build directory & navigate into it  
    b. Run `cmake ../.`  
@@ -31,6 +33,26 @@ test:      Sample code that uses the library
    c. Run `cmake --build .`  
 4. Move *pympnn.so* file to python interpreter library (i.e. */usr/lib/python3.6/*)
 5. Run test suites (C++ and Python) to ensure proper installation
+
+### Windows
+
+1. Requirements
+    a. MSVC (Microsoft Studio Visual Code)
+    b. cmake
+2. Build the mpnn library
+    a. Create build directory
+    b. In the CMake GUI, specify source code directory (*pympnn* directory) and where to build the binaries (build directory)
+    c. Configure and Generate
+    d. Navigate into build directory and run `cmake --build .`
+3. Move *mpnn.dll* library file from from build dir (perhaps in *./build/Debug/*) to local library (i.e. */Windows/System32*)
+4. Build pympnn library in the boost directory
+    a. Create build directory
+    b. In the CMake GUI, specify source code directory (*pympnn* directory) and where to build the binaries (build directory)
+    c. Configure and Generate
+        -If this fails, you may have to specify the *MPNN_LIB* and *MULTIANN_PATH* paths manually
+    d. Navigate into build directory and run `cmake --build .`
+5. Move *pympnn.dll* library file to python interpreter library (i.e. )
+6. Run test suites to ensure proper installation
 
 ## History
 
