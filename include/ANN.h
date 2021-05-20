@@ -98,7 +98,7 @@
 #include <cstdio>			// standard I/O (for NULL)
 #include <iostream>			// I/O streams
 #include <math.h>			// math includes
-#include <values.h>			// special values
+#include <float.h>			// special values
 
 #define ANNversion	"0.1"		// ANN version number
 
@@ -139,7 +139,7 @@ enum ANNbool {ANNfalse = 0, ANNtrue = 1};
 //
 //	    Examples:
 //	    ANNdist:		double, float, long, int, short
-//	    ANN_DIST_INF:	MAXDOUBLE, MAXFLOAT, MAXLONG, MAXINT, MAXSHORT
+//	    ANN_DIST_INF:	DBL_MAX, FLT_MAX, MAXLONG, MAXINT, MAXSHORT
 //
 //
 //	ANNidx is a point index.  When the data structure is built,
@@ -154,7 +154,7 @@ typedef	double	ANNdist;		// distance data type
 typedef int	ANNidx;			// point index
 
 					// largest possible distance
-const ANNdist	ANN_DIST_INF	=  MAXDOUBLE;
+const ANNdist	ANN_DIST_INF	=  DBL_MAX;
 
 //----------------------------------------------------------------------
 // Self match?
