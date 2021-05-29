@@ -36,23 +36,23 @@ test:      Sample code that uses the library
 
 ### Windows
 
-1. Requirements
-    a. MSVC (Microsoft Studio Visual Code)
-    b. cmake
-2. Build the mpnn library
-    a. Create build directory
-    b. In the CMake GUI, specify source code directory (*pympnn* directory) and where to build the binaries (build directory)
-    c. Configure and Generate
-    d. Navigate into build directory and run `cmake --build .`
-3. Move *mpnn.dll* library file from from build dir (perhaps in *./build/Debug/*) to local library (i.e. */Windows/System32*)
-4. Build pympnn library in the boost directory
-    a. Create build directory
-    b. In the CMake GUI, specify source code directory (*pympnn* directory) and where to build the binaries (build directory)
-    c. Configure and Generate
-        -If this fails, you may have to specify the *MPNN_LIB* and *MULTIANN_PATH* paths manually
-    d. Navigate into build directory and run `cmake --build .`
-5. Move *pympnn.dll* library file to python interpreter library (i.e. )
-6. Run test suites to ensure proper installation
+1. Requirements  
+   a. MSVC (Microsoft Studio Visual Code)  
+   b. cmake  
+2. Build the mpnn library  
+   a. Create build directory  
+   b. In the CMake GUI, specify source code directory (*pympnn* directory) and where to build the binaries (build directory)  
+   c. Configure and Generate  
+   d. Navigate into build directory and run `cmake --build .`
+3. Move *mpnn.dll* library file from from build dir (perhaps in *./build/Debug/*) to local library (i.e. */Windows/System32*)  
+4. Build pympnn library in the boost directory  
+   a. Create build directory  
+   b. In the CMake GUI, specify source code directory (*pympnn* directory) and where to build the binaries (build directory)  
+   c. Configure and Generate  
+&nbsp;&nbsp;&nbsp;    - If this fails, you may have to specify the *MPNN_LIB* and *MULTIANN_PATH* paths manually  
+   d. Navigate into build directory and run `cmake --build .`  
+5. Move *pympnn.dll* library file to python interpreter library
+6. Run test suites to ensure proper installation  
 
 ## History
 
