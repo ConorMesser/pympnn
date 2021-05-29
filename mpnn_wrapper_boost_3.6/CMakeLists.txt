@@ -3,6 +3,7 @@ include(ExternalProject)
 
 # Adding customized cmake module for building boost
 list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+message(STATUS "Source_dir = ${CMAKE_SOURCE_DIR}")
 
 set(CMAKE_CXX_COMPILER "/usr/bin/g++-6")
 message(STATUS "Using C++11 standard")
@@ -20,7 +21,8 @@ project(test_mpnn)
   include(cmake/Modules/BuildBoost) # Custom module
 
   # Find mpnn library
-  find_library(MPNN_LIB libmpnn.so)
+  # I think this section is what is failing, but that may be because the mpnn.dll isn't properly built?
+  find_library(MPNN_LIB mpnn.dll PATHS ${CMAKE_SOURCE_DIR}/libs)
   find_path(MULTIANN_PATH mpnn/multiann.h)
 
   include_directories(${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${usr/local/include/mpnn})
@@ -33,6 +35,6 @@ project(test_mpnn)
   add_dependencies(pympnn Boost)
 
   # Tweaks the name of the library to match what Python expects
-  set_target_properties(pympnn PROPERTIES SUFFIX .so)
+  set_target_properties(pympnn PROPERTIES SUFFIX .dll) 
   set_target_properties(pympnn PROPERTIES PREFIX "")
 
