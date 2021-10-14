@@ -22,13 +22,12 @@ test:      Sample code that uses the library
 
 ### Linux
 
-0. Ensure prerequisites are installed
-   a. cmake
-          - `sudo apt update`
-          - `sudo apt upgrade`
-          - `sudo snap install cmake –classic`
-
-1. Build the mpnn library  
+0. Ensure prerequisites are installed  
+   a. cmake  
+          - `sudo apt update`  
+          - `sudo apt upgrade`  
+          - `sudo snap install cmake –classic`  
+1. Build the mpnn library   
    a. Create build directory & navigate into it  
    b. Run `cmake ../.`  
    c. Run `cmake --build .`  
