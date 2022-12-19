@@ -36,7 +36,7 @@ test:      Sample code that uses the library
    a. Create build directory & navigate to it  
    b. Run `cmake ../.`  
    c. Run `cmake --build .`  
-4. Move *pympnn.so* file to python interpreter library (i.e. */usr/lib/python3.6/*)
+4. Move *pympnn.so* file to python interpreter library (i.e. */usr/lib/python3.8/*)
 5. Run test suites (C++ and Python) to ensure proper installation
 
 
