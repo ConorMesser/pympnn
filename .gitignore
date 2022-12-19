@@ -3,3 +3,5 @@ CMakeFiles
 Makefile
 *.cmake
 libDNN.a
+boost_py3.8/build
+build
